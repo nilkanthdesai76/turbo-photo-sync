@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  validate:
+    name: Validate Server and iOS Project
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Verify Python Server Syntax
+        run: |
+          python3 -m py_compile server/server.py
+
+      - name: Select Latest Xcode
+        run: sudo xcode-select -switch /Applications/Xcode.app
+
+      - name: Build iOS Application
+        run: |
+          xcodebuild -project PhotoSync5G/PhotoSync5G.xcodeproj \
+                     -scheme PhotoSync5G \
+                     -destination 'generic/platform=iOS' \
+                     CODE_SIGNING_ALLOWED=NO \
+                     build
